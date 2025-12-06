@@ -31,7 +31,7 @@
     <div class="min-h-screen flex flex-col">
       <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur">
         <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-          <div class="flex items-center gap-2">
+          <a href="/" class="flex items-center gap-2 text-slate-100 hover:text-white">
             <div class="h-8 w-8 rounded-xl bg-indigo-500/80 flex items-center justify-center text-xs font-bold">
               FL
             </div>
@@ -39,7 +39,7 @@
               <div class="text-sm font-semibold tracking-tight">FleetLedger</div>
               <div class="text-xs text-slate-400">Deine gemieteten Server im Blick</div>
             </div>
-          </div>
+          </a>
           <div class="flex items-center gap-3 text-xs">
             {% if current_user %}
               <span class="text-slate-300">
