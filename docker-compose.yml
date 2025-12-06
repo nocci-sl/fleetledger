@@ -12,7 +12,7 @@ services:
       # Set to 0 only for local HTTP testing; keep secure (default) in production
       - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE:-1}
       # Optional: encryption key for management passwords (Fernet key)
-      # - ENCRYPTION_KEY=your_fernet_key_here
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-}
     volumes:
       - ./data:/app/data
     restart: unless-stopped
