@@ -23,10 +23,9 @@
 <div class="flex flex-col gap-4">
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <div>
-      <h1 class="text-lg font-semibold tracking-tight">Server-Karte</h1>
+      <h1 class="text-lg font-semibold tracking-tight">{{ t("map.title") }}</h1>
       <p class="text-xs text-slate-400">
-        Zeigt alle nicht archivierten Server mit gesetzter Location auf einer Karte.
-        Für grobe Übersicht reicht die Stadt – keine exakten GPS-Daten notwendig.
+        {{ t("map.subtitle") }}
       </p>
     </div>
   </div>
@@ -50,8 +49,7 @@
   ></div>
 
   <p class="text-[11px] text-slate-500">
-    Hinweis: Marker werden anhand der Location-Namen grob auf der Weltkarte platziert. Mehrere Server
-    in derselben Stadt werden leicht versetzt dargestellt, damit sie klickbar bleiben.
+    {{ t("map.note") }}
   </p>
 </div>
 {% endblock %}

@@ -3,9 +3,9 @@
 <div class="space-y-4">
   <div class="flex items-center justify-between">
     <div>
-      <h1 class="text-lg font-semibold tracking-tight">Benutzerverwaltung</h1>
+      <h1 class="text-lg font-semibold tracking-tight">{{ t("users.title") }}</h1>
       <p class="text-xs text-slate-400">
-        Admins können Benutzer aktivieren/deaktivieren. Der eigene Account kann nicht deaktiviert werden.
+        {{ t("users.subtitle") }}
       </p>
     </div>
   </div>
@@ -14,11 +14,11 @@
     <table class="min-w-full text-sm">
       <thead class="bg-slate-900/80 text-xs uppercase tracking-wide text-slate-400">
         <tr>
-          <th class="px-3 py-2 text-left">Benutzername</th>
-          <th class="px-3 py-2 text-left">E-Mail</th>
-          <th class="px-3 py-2 text-left">Rolle</th>
-          <th class="px-3 py-2 text-left">Status</th>
-          <th class="px-3 py-2 text-right">Aktion</th>
+          <th class="px-3 py-2 text-left">{{ t("users.username") }}</th>
+          <th class="px-3 py-2 text-left">{{ t("users.email") }}</th>
+          <th class="px-3 py-2 text-left">{{ t("users.role") }}</th>
+          <th class="px-3 py-2 text-left">{{ t("users.status") }}</th>
+          <th class="px-3 py-2 text-right">{{ t("users.action") }}</th>
         </tr>
       </thead>
       <tbody>
@@ -31,16 +31,16 @@
             {% if u.email %}{{ u.email }}{% else %}<span class="text-slate-500">–</span>{% endif %}
           </td>
           <td class="px-3 py-2 text-slate-200">
-            {% if u.is_admin %}Admin{% else %}User{% endif %}
+            {% if u.is_admin %}{{ t("role.admin") }}{% else %}{{ t("role.user") }}{% endif %}
           </td>
           <td class="px-3 py-2 text-slate-200">
             {% if u.is_active %}
               <span class="inline-flex rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] text-emerald-200 border border-emerald-500/50">
-                aktiv
+                {{ t("status.active") }}
               </span>
             {% else %}
               <span class="inline-flex rounded-full bg-slate-800 px-2 py-0.5 text-[11px] text-slate-300 border border-slate-600">
-                deaktiviert
+                {{ t("status.inactive") }}
               </span>
             {% endif %}
           </td>
@@ -52,11 +52,11 @@
                 type="submit"
                 class="rounded-lg border border-slate-700 px-3 py-1 text-xs text-slate-200 hover:border-slate-500 hover:text-white"
               >
-                {% if u.is_active %}Deaktivieren{% else %}Aktivieren{% endif %}
+                {% if u.is_active %}{{ t("action.deactivate") }}{% else %}{{ t("action.activate") }}{% endif %}
               </button>
             </form>
             {% else %}
-            <span class="text-[11px] text-slate-500">Eigener Account</span>
+            <span class="text-[11px] text-slate-500">{{ t("users.own_account") }}</span>
             {% endif %}
           </td>
         </tr>

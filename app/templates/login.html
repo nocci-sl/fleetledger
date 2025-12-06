@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="max-w-sm mx-auto mt-8">
-  <h1 class="text-lg font-semibold tracking-tight mb-1">Login</h1>
-  <p class="text-xs text-slate-400 mb-4">Melde dich an, um deine Server zu verwalten.</p>
+  <h1 class="text-lg font-semibold tracking-tight mb-1">{{ t("login.title") }}</h1>
+  <p class="text-xs text-slate-400 mb-4">{{ t("login.subtitle") }}</p>
 
   {% if error %}
   <div class="mb-4 text-xs text-rose-200 bg-rose-500/10 border border-rose-500/60 rounded-lg p-3">
@@ -13,7 +13,7 @@
   <form method="post" class="space-y-4">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <div class="space-y-1">
-      <label class="text-xs text-slate-300">Benutzername</label>
+      <label class="text-xs text-slate-300">{{ t("login.username") }}</label>
       <input
         type="text"
         name="username"
@@ -22,7 +22,7 @@
       />
     </div>
     <div class="space-y-1">
-      <label class="text-xs text-slate-300">Passwort</label>
+      <label class="text-xs text-slate-300">{{ t("login.password") }}</label>
       <input
         type="password"
         name="password"
@@ -31,13 +31,13 @@
       />
     </div>
     <div class="flex justify-between items-center text-xs text-slate-400">
-      <span>Noch kein Account? <a href="/register" class="text-indigo-300 hover:text-indigo-200 underline">Registrieren</a></span>
+      <span>{{ t("login.no_account") }} <a href="/register" class="text-indigo-300 hover:text-indigo-200 underline">{{ t("login.register") }}</a></span>
     </div>
     <button
       type="submit"
       class="w-full rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 focus:outline-none focus:ring focus:ring-indigo-500/40"
     >
-      Einloggen
+      {{ t("login.submit") }}
     </button>
   </form>
 </div>

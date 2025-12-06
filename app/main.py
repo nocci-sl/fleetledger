@@ -18,6 +18,9 @@ from .utils import (
     ensure_csrf_token,
     validate_csrf,
 )
+from jinja2 import pass_context
+
+from .i18n import AVAILABLE_LANGUAGES, resolve_locale, translate
 from .auth import (
     hash_password,
     verify_password,
@@ -30,6 +33,7 @@ app = FastAPI(title="FleetLedger")
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
+templates.env.globals["languages"] = AVAILABLE_LANGUAGES
 
 # Session middleware (server-side session based on signed cookie)
 SESSION_SECRET = os.getenv("SESSION_SECRET")
@@ -48,6 +52,23 @@ app.add_middleware(
     session_cookie="fleetledger_session",
     max_age=60 * 60 * 24 * 30,  # 30 days
 )
+
+
+@app.middleware("http")
+async def add_locale_to_request(request: Request, call_next):
+    request.state.locale = resolve_locale(request)
+    response = await call_next(request)
+    return response
+
+
+@pass_context
+def _t(ctx, key: str, **kwargs) -> str:
+    request = ctx.get("request")
+    locale = getattr(request.state, "locale", "de") if request else "de"
+    return translate(key, locale, **kwargs)
+
+
+templates.env.globals["t"] = _t
 
 
 @app.on_event("startup")
@@ -72,6 +93,17 @@ def service_worker() -> FileResponse:
         media_type="application/javascript",
         headers={"Service-Worker-Allowed": "/"},
     )
+
+
+@app.get("/lang/{code}", include_in_schema=False)
+def switch_language(code: str, request: Request):
+    """Persist preferred language in session and redirect back."""
+    code = code.lower()
+    if code not in AVAILABLE_LANGUAGES:
+        return RedirectResponse("/", status_code=303)
+    request.session["lang"] = code
+    referer = request.headers.get("referer") or "/"
+    return RedirectResponse(referer, status_code=303)
 
 
 # ------------- Auth: Register / Login / Logout -------------

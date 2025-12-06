@@ -2,15 +2,15 @@
 {% block content %}
 <div class="max-w-3xl mx-auto">
   <h1 class="text-lg font-semibold tracking-tight mb-1">
-    {% if server %}Server bearbeiten{% else %}Neuen Server anlegen{% endif %}
+    {% if server %}{{ t("form.title.edit") }}{% else %}{{ t("form.title.new") }}{% endif %}
   </h1>
   <p class="text-xs text-slate-400 mb-4">
-    Trage alle relevanten Infos zu deinem VPS / Server ein.
+    {{ t("form.subtitle") }}
   </p>
 
   {% if not can_encrypt %}
   <div class="mb-4 text-xs text-amber-200 bg-amber-500/10 border border-amber-500/60 rounded-lg p-3">
-    ENCRYPTION_KEY ist nicht gesetzt – eingegebene Management-Passwörter werden nicht gespeichert.
+    {{ t("warning.no_encryption_short") }}
   </div>
   {% endif %}
 
@@ -18,10 +18,10 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <!-- General -->
     <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
-      <h2 class="text-sm font-semibold text-slate-100">Allgemein</h2>
+      <h2 class="text-sm font-semibold text-slate-100">{{ t("section.general") }}</h2>
       <div class="grid md:grid-cols-2 gap-4">
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">Name *</label>
+          <label class="text-xs text-slate-300">{{ t("label.name") }} *</label>
           <input
             type="text"
             name="name"
@@ -32,7 +32,7 @@
           />
         </div>
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">Provider *</label>
+          <label class="text-xs text-slate-300">{{ t("label.provider") }} *</label>
           <input
             type="text"
             name="provider"
@@ -43,7 +43,7 @@
           />
         </div>
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">Hostname</label>
+          <label class="text-xs text-slate-300">{{ t("label.hostname") }}</label>
           <input
             type="text"
             name="hostname"
@@ -53,7 +53,7 @@
           />
         </div>
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">Typ</label>
+          <label class="text-xs text-slate-300">{{ t("label.type") }}</label>
           <select
             name="type"
             class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
@@ -67,7 +67,7 @@
           </select>
         </div>
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">Location</label>
+          <label class="text-xs text-slate-300">{{ t("label.location") }}</label>
           <input
             type="text"
             name="location"
@@ -77,7 +77,7 @@
           />
         </div>
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">Tags (kommagetrennt)</label>
+          <label class="text-xs text-slate-300">{{ t("label.tags") }}</label>
           <input
             type="text"
             name="tags"
@@ -91,10 +91,10 @@
 
     <!-- Network -->
     <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
-      <h2 class="text-sm font-semibold text-slate-100">Netzwerk</h2>
+      <h2 class="text-sm font-semibold text-slate-100">{{ t("section.network") }}</h2>
       <div class="grid md:grid-cols-2 gap-4">
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">IPv4</label>
+          <label class="text-xs text-slate-300">{{ t("label.ipv4") }}</label>
           <input
             type="text"
             name="ipv4"
@@ -104,7 +104,7 @@
           />
         </div>
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">IPv6</label>
+          <label class="text-xs text-slate-300">{{ t("label.ipv6") }}</label>
           <input
             type="text"
             name="ipv6"
@@ -118,10 +118,10 @@
 
     <!-- Costs -->
     <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
-      <h2 class="text-sm font-semibold text-slate-100">Kosten</h2>
+      <h2 class="text-sm font-semibold text-slate-100">{{ t("section.costs") }}</h2>
       <div class="grid md:grid-cols-3 gap-4">
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">Betrag</label>
+          <label class="text-xs text-slate-300">{{ t("label.amount") }}</label>
           <input
             type="number"
             step="0.01"
@@ -132,7 +132,7 @@
           />
         </div>
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">Währung</label>
+          <label class="text-xs text-slate-300">{{ t("label.currency") }}</label>
           <input
             type="text"
             name="currency"
@@ -141,7 +141,7 @@
           />
         </div>
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">Abrechnung</label>
+          <label class="text-xs text-slate-300">{{ t("label.billing") }}</label>
           <select
             name="billing_period"
             class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
@@ -153,7 +153,7 @@
           </select>
         </div>
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">Vertragsbeginn</label>
+          <label class="text-xs text-slate-300">{{ t("label.contract_start") }}</label>
           <input
             type="date"
             name="contract_start"
@@ -162,7 +162,7 @@
           />
         </div>
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">Vertragsende</label>
+          <label class="text-xs text-slate-300">{{ t("label.contract_end") }}</label>
           <input
             type="date"
             name="contract_end"
@@ -175,10 +175,10 @@
 
     <!-- Hardware -->
     <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
-      <h2 class="text-sm font-semibold text-slate-100">Hardware</h2>
+      <h2 class="text-sm font-semibold text-slate-100">{{ t("section.hardware.small") }}</h2>
       <div class="grid md:grid-cols-2 gap-4">
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">CPU-Modell</label>
+          <label class="text-xs text-slate-300">{{ t("label.cpu_model") }}</label>
           <input
             type="text"
             name="cpu_model"
@@ -188,7 +188,7 @@
           />
         </div>
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">CPU Cores</label>
+          <label class="text-xs text-slate-300">{{ t("label.cpu_cores") }}</label>
           <input
             type="number"
             name="cpu_cores"
@@ -197,7 +197,7 @@
           />
         </div>
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">RAM (MB)</label>
+          <label class="text-xs text-slate-300">{{ t("label.ram_mb") }}</label>
           <input
             type="number"
             name="ram_mb"
@@ -206,7 +206,7 @@
           />
         </div>
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">Storage (GB)</label>
+          <label class="text-xs text-slate-300">{{ t("label.storage_gb") }}</label>
           <input
             type="number"
             name="storage_gb"
@@ -215,7 +215,7 @@
           />
         </div>
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">Storage-Typ</label>
+          <label class="text-xs text-slate-300">{{ t("label.storage_type") }}</label>
           <input
             type="text"
             name="storage_type"
@@ -229,13 +229,13 @@
 
     <!-- Access -->
     <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
-      <h2 class="text-sm font-semibold text-slate-100">Zugänge</h2>
+      <h2 class="text-sm font-semibold text-slate-100">{{ t("section.access.small") }}</h2>
       <p class="text-xs text-slate-400">
-        SSH: hier nur <strong>Key-Namen</strong> oder Hints eintragen, keine privaten Keys.
+        {{ t("hint.ssh") }}
       </p>
       <div class="grid md:grid-cols-2 gap-4">
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">Management URL</label>
+          <label class="text-xs text-slate-300">{{ t("label.mgmt_url") }}</label>
           <input
             type="url"
             name="mgmt_url"
@@ -245,7 +245,7 @@
           />
         </div>
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">Management User</label>
+          <label class="text-xs text-slate-300">{{ t("label.mgmt_user") }}</label>
           <input
             type="text"
             name="mgmt_user"
@@ -254,7 +254,7 @@
           />
         </div>
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">Management Passwort</label>
+          <label class="text-xs text-slate-300">{{ t("label.mgmt_password") }}</label>
           <input
             type="password"
             name="mgmt_password"
@@ -263,7 +263,7 @@
           />
         </div>
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">SSH User</label>
+          <label class="text-xs text-slate-300">{{ t("label.ssh_user") }}</label>
           <input
             type="text"
             name="ssh_user"
@@ -273,7 +273,7 @@
           />
         </div>
         <div class="space-y-1">
-          <label class="text-xs text-slate-300">SSH Key Hint</label>
+          <label class="text-xs text-slate-300">{{ t("label.ssh_key_hint") }}</label>
           <input
             type="text"
             name="ssh_key_hint"
@@ -287,7 +287,7 @@
 
     <!-- Notes -->
     <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
-      <h2 class="text-sm font-semibold text-slate-100">Notizen</h2>
+      <h2 class="text-sm font-semibold text-slate-100">{{ t("section.notes.small") }}</h2>
       <textarea
         name="notes"
         rows="4"
@@ -300,13 +300,13 @@
       <a
         href="/"
         class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-200 hover:border-slate-500 hover:text-white"
-        >Abbrechen</a
+        >{{ t("btn.cancel") }}</a
       >
       <button
         type="submit"
         class="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 focus:outline-none focus:ring focus:ring-indigo-500/40"
       >
-        {% if server %}Änderungen speichern{% else %}Speichern{% endif %}
+        {% if server %}{{ t("btn.save_changes") }}{% else %}{{ t("btn.save") }}{% endif %}
       </button>
     </div>
   </form>

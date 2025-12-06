@@ -3,9 +3,9 @@
 <div class="flex flex-col gap-4">
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <div>
-      <h1 class="text-lg font-semibold tracking-tight">Admin-Dashboard</h1>
+      <h1 class="text-lg font-semibold tracking-tight">{{ t("admin.title") }}</h1>
       <p class="text-xs text-slate-400">
-        Globale Übersicht über alle nicht archivierten Server und Benutzer.
+        {{ t("admin.subtitle") }}
       </p>
     </div>
   </div>
@@ -13,36 +13,36 @@
   {% if stats %}
   <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
     <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-3 flex flex-col">
-      <span class="text-[11px] text-slate-400 mb-1">Benutzer</span>
+      <span class="text-[11px] text-slate-400 mb-1">{{ t("admin.users") }}</span>
       <span class="text-lg font-semibold text-slate-100">
         {{ stats.total_users }}
       </span>
-      <span class="text-[11px] text-slate-500 mt-1">Accounts</span>
+      <span class="text-[11px] text-slate-500 mt-1">{{ t("admin.users_caption") }}</span>
     </div>
     <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-3 flex flex-col">
-      <span class="text-[11px] text-slate-400 mb-1">Server</span>
+      <span class="text-[11px] text-slate-400 mb-1">{{ t("admin.servers") }}</span>
       <span class="text-lg font-semibold text-slate-100">
         {{ stats.total_servers }}
       </span>
-      <span class="text-[11px] text-slate-500 mt-1">nicht archiviert</span>
+      <span class="text-[11px] text-slate-500 mt-1">{{ t("admin.servers_caption") }}</span>
     </div>
     <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-3 flex flex-col">
-      <span class="text-[11px] text-slate-400 mb-1">Laufende Kosten</span>
+      <span class="text-[11px] text-slate-400 mb-1">{{ t("admin.costs") }}</span>
       <span class="text-lg font-semibold text-slate-100">
         {{ "%.2f"|format(stats.monthly_total) }}
         {% if stats.monthly_currency %} {{ stats.monthly_currency }}{% endif %}
       </span>
       <span class="text-[11px] text-slate-500 mt-1">
-        pro Monat{% if stats.mixed_currencies %} (gemischte Währungen){% endif %}
+        {{ t("admin.per_month") }}{% if stats.mixed_currencies %} {{ t("stats.mixed_currencies") }}{% endif %}
       </span>
     </div>
     <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-3 flex flex-col">
-      <span class="text-[11px] text-slate-400 mb-1">Vertragstatus</span>
+      <span class="text-[11px] text-slate-400 mb-1">{{ t("admin.contract_status") }}</span>
       <span class="text-[11px] text-amber-200">
-        Bald auslaufend: {{ stats.expiring_soon }}
+        {{ t("admin.expiring") }}: {{ stats.expiring_soon }}
       </span>
       <span class="text-[11px] text-rose-200">
-        Abgelaufen: {{ stats.expired }}
+        {{ t("admin.expired") }}: {{ stats.expired }}
       </span>
     </div>
   </div>
@@ -50,16 +50,16 @@
 
   <!-- Provider breakdown -->
   <section class="space-y-2 mt-4">
-    <h2 class="text-sm font-semibold tracking-tight text-slate-200">Nach Provider</h2>
+    <h2 class="text-sm font-semibold tracking-tight text-slate-200">{{ t("admin.by_provider") }}</h2>
     <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/60">
       <table class="min-w-full text-sm">
         <thead class="bg-slate-900/80 text-xs uppercase tracking-wide text-slate-400">
           <tr>
-            <th class="px-3 py-2 text-left">Provider</th>
-            <th class="px-3 py-2 text-right">Server</th>
-            <th class="px-3 py-2 text-right">Monatskosten</th>
-            <th class="px-3 py-2 text-right">Laufen bald aus</th>
-            <th class="px-3 py-2 text-right">Abgelaufen</th>
+            <th class="px-3 py-2 text-left">{{ t("admin.provider") }}</th>
+            <th class="px-3 py-2 text-right">{{ t("admin.count") }}</th>
+            <th class="px-3 py-2 text-right">{{ t("admin.monthly_costs") }}</th>
+            <th class="px-3 py-2 text-right">{{ t("admin.expiring_soon") }}</th>
+            <th class="px-3 py-2 text-right">{{ t("admin.expired_count") }}</th>
           </tr>
         </thead>
         <tbody>
@@ -95,7 +95,7 @@
   <!-- Contracts: expiring soon & expired -->
   <section class="grid md:grid-cols-2 gap-4 mt-4">
     <div class="space-y-2">
-      <h2 class="text-sm font-semibold tracking-tight text-slate-200">Laufen bald aus (≤ 30 Tage)</h2>
+      <h2 class="text-sm font-semibold tracking-tight text-slate-200">{{ t("admin.contracts_expiring") }}</h2>
       <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-3 text-xs">
         {% if expiring_soon_list %}
         <ul class="space-y-2">
@@ -117,13 +117,13 @@
           {% endfor %}
         </ul>
         {% else %}
-        <div class="text-slate-500">Keine Verträge laufen in den nächsten 30 Tagen aus.</div>
+        <div class="text-slate-500">{{ t("admin.contracts_none_soon") }}</div>
         {% endif %}
       </div>
     </div>
 
     <div class="space-y-2">
-      <h2 class="text-sm font-semibold tracking-tight text-slate-200">Abgelaufene Verträge</h2>
+      <h2 class="text-sm font-semibold tracking-tight text-slate-200">{{ t("admin.contracts_expired") }}</h2>
       <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-3 text-xs">
         {% if expired_list %}
         <ul class="space-y-2">
@@ -145,7 +145,7 @@
           {% endfor %}
         </ul>
         {% else %}
-        <div class="text-slate-500">Keine abgelaufenen Verträge gefunden.</div>
+        <div class="text-slate-500">{{ t("admin.contracts_none_expired") }}</div>
         {% endif %}
       </div>
     </div>

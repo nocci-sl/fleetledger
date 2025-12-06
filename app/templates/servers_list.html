@@ -3,15 +3,15 @@
 <div class="flex flex-col gap-4">
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <div>
-      <h1 class="text-lg font-semibold tracking-tight">Deine Server</h1>
+      <h1 class="text-lg font-semibold tracking-tight">{{ t("server_list.title") }}</h1>
       <p class="text-xs text-slate-400">
-        Übersicht aller gemieteten VPS, dedizierten Server und Storage-Systeme.
+        {{ t("server_list.subtitle") }}
       </p>
     </div>
     <div class="flex items-center gap-3 text-xs text-slate-400">
       {% if not can_encrypt %}
       <span class="px-2 py-1 rounded-md border border-amber-500/60 bg-amber-500/10 text-amber-200">
-        Hinweis: ENCRYPTION_KEY nicht gesetzt – Passwörter werden nicht gespeichert.
+        {{ t("warning.no_encryption") }}
       </span>
       {% endif %}
     </div>
@@ -21,35 +21,35 @@
   <!-- Small dashboard summary row -->
   <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
     <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-3 flex flex-col">
-      <span class="text-[11px] text-slate-400 mb-1">Gesamt</span>
+      <span class="text-[11px] text-slate-400 mb-1">{{ t("stats.total") }}</span>
       <span class="text-lg font-semibold text-slate-100">
         {{ stats.total_servers }}
       </span>
-      <span class="text-[11px] text-slate-500 mt-1">aktive Server</span>
+      <span class="text-[11px] text-slate-500 mt-1">{{ t("stats.active") }}</span>
     </div>
     <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-3 flex flex-col">
-      <span class="text-[11px] text-slate-400 mb-1">Laufende Kosten</span>
+      <span class="text-[11px] text-slate-400 mb-1">{{ t("stats.costs") }}</span>
       <span class="text-lg font-semibold text-slate-100">
         {{ "%.2f"|format(stats.monthly_total) }}
         {% if stats.monthly_currency %} {{ stats.monthly_currency }}{% endif %}
       </span>
       <span class="text-[11px] text-slate-500 mt-1">
-        pro Monat{% if stats.mixed_currencies %} (gemischte Währungen){% endif %}
+        {{ t("stats.per_month") }}{% if stats.mixed_currencies %} {{ t("stats.mixed_currencies") }}{% endif %}
       </span>
     </div>
     <div class="rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-3 flex flex-col">
-      <span class="text-[11px] text-amber-200 mb-1">Laufen bald aus</span>
+      <span class="text-[11px] text-amber-200 mb-1">{{ t("stats.expiring_soon") }}</span>
       <span class="text-lg font-semibold text-amber-100">
         {{ stats.expiring_soon }}
       </span>
-      <span class="text-[11px] text-amber-200/80 mt-1">≤ 30 Tage</span>
+      <span class="text-[11px] text-amber-200/80 mt-1">{{ t("stats.expiring_soon_hint") }}</span>
     </div>
     <div class="rounded-xl border border-rose-600/60 bg-rose-600/10 px-3 py-3 flex flex-col">
-      <span class="text-[11px] text-rose-100 mb-1">Abgelaufen</span>
+      <span class="text-[11px] text-rose-100 mb-1">{{ t("stats.expired") }}</span>
       <span class="text-lg font-semibold text-rose-50">
         {{ stats.expired }}
       </span>
-      <span class="text-[11px] text-rose-100/80 mt-1">Vertrag beendet</span>
+      <span class="text-[11px] text-rose-100/80 mt-1">{{ t("stats.expired_hint") }}</span>
     </div>
   </div>
   {% endif %}
@@ -59,13 +59,13 @@
     <table class="min-w-full text-sm">
       <thead class="bg-slate-900/80">
         <tr class="text-xs uppercase tracking-wide text-slate-400">
-          <th class="px-3 py-2 text-left">Name</th>
-          <th class="px-3 py-2 text-left">Provider</th>
-          <th class="px-3 py-2 text-left">Type</th>
-          <th class="px-3 py-2 text-left">Location</th>
-          <th class="px-3 py-2 text-left">IPv4</th>
-          <th class="px-3 py-2 text-right">Kosten</th>
-          <th class="px-3 py-2 text-right">Aktion</th>
+          <th class="px-3 py-2 text-left">{{ t("table.name") }}</th>
+          <th class="px-3 py-2 text-left">{{ t("table.provider") }}</th>
+          <th class="px-3 py-2 text-left">{{ t("table.type") }}</th>
+          <th class="px-3 py-2 text-left">{{ t("table.location") }}</th>
+          <th class="px-3 py-2 text-left">{{ t("table.ipv4") }}</th>
+          <th class="px-3 py-2 text-right">{{ t("table.costs") }}</th>
+          <th class="px-3 py-2 text-right">{{ t("table.action") }}</th>
         </tr>
       </thead>
       <tbody>
@@ -83,11 +83,11 @@
               </div>
               {% if s.is_expired %}
               <span class="inline-flex items-center rounded-full bg-rose-600/15 border border-rose-600/60 px-2 py-0.5 text-[10px] text-rose-200">
-                abgelaufen
+                {{ t("status.expired") }}
               </span>
               {% elif s.is_expiring_soon %}
               <span class="inline-flex items-center rounded-full bg-amber-500/15 border border-amber-500/60 px-2 py-0.5 text-[10px] text-amber-200">
-                läuft bald aus
+                {{ t("status.expiring") }}
               </span>
               {% endif %}
             </div>
@@ -107,14 +107,14 @@
           <td class="px-3 py-2 text-right text-slate-200">
             {% if s.price %}
             {{ "%.2f"|format(s.price) }} {{ s.currency }}
-            <span class="text-[11px] text-slate-400">/ {{ "Monat" if s.billing_period == "monthly" else "Jahr" }}</span>
+            <span class="text-[11px] text-slate-400">/ {{ t("price.month") if s.billing_period == "monthly" else t("price.year") }}</span>
             {% else %}
             <span class="text-slate-500">–</span>
             {% endif %}
           </td>
           <td class="px-3 py-2 text-right text-slate-200">
             <a href="/servers/{{ s.id }}/edit" class="text-indigo-300 hover:text-indigo-200 underline text-xs">
-              Bearbeiten
+              {{ t("server_detail.edit") }}
             </a>
           </td>
         </tr>
@@ -124,7 +124,7 @@
   </div>
   {% else %}
   <div class="rounded-xl border border-dashed border-slate-700 bg-slate-900/40 p-6 text-sm text-slate-300">
-    Noch keine Server erfasst. Leg den ersten mit „Server anlegen“ oben rechts an.
+    {{ t("server_list.empty") }}
   </div>
   {% endif %}
 </div>

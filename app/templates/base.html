@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de" class="dark" id="html-root">
+<html lang="{{ request.state.locale if request and request.state and request.state.locale else 'de' }}" class="dark" id="html-root">
   <head>
     <meta charset="utf-8" />
     <title>FleetLedger</title>
@@ -37,52 +37,63 @@
             </div>
             <div>
               <div class="text-sm font-semibold tracking-tight">FleetLedger</div>
-              <div class="text-xs text-slate-400">Deine gemieteten Server im Blick</div>
+              <div class="text-xs text-slate-400">{{ t("brand.tagline") }}</div>
             </div>
           </a>
           <div class="flex items-center gap-3 text-xs">
             {% if current_user %}
               <span class="text-slate-300">
-                Eingeloggt als <span class="font-semibold">{{ current_user.username }}</span>
+                {{ t("nav.logged_in_as") }} <span class="font-semibold">{{ current_user.username }}</span>
                 {% if current_user.is_admin %}
                   <span class="ml-1 px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/40 text-emerald-200 text-[10px]">Admin</span>
                 {% endif %}
               </span>
               {% if current_user.is_admin %}
               <a href="/admin/dashboard" class="text-slate-300 hover:text-white underline-offset-2 hover:underline">
-                Admin-Dashboard
+                {{ t("nav.admin") }}
               </a>
               <a href="/users" class="text-slate-300 hover:text-white underline-offset-2 hover:underline">
-                User
+                {{ t("nav.users") }}
               </a>
               {% endif %}
               <a href="/" class="text-slate-300 hover:text-white underline-offset-2 hover:underline">
-                Übersicht
+                {{ t("nav.overview") }}
               </a>
               <a href="/map" class="text-slate-300 hover:text-white underline-offset-2 hover:underline">
-                Karte
+                {{ t("nav.map") }}
               </a>
               <a
                 href="/servers/new"
                 class="inline-flex items-center gap-1 rounded-lg bg-indigo-500 px-3 py-1.5 font-medium hover:bg-indigo-400 focus:outline-none focus:ring focus:ring-indigo-500/40"
               >
                 <span class="text-lg leading-none">＋</span>
-                <span>Server anlegen</span>
+                <span>{{ t("nav.new_server") }}</span>
               </a>
               <a
                 href="/logout"
                 class="rounded-lg border border-slate-700 px-2.5 py-1 text-slate-300 hover:border-slate-500 hover:text-white"
               >
-                Logout
+                {{ t("nav.logout") }}
               </a>
             {% else %}
               <a href="/login" class="text-slate-300 hover:text-white underline-offset-2 hover:underline">
-                Login
+                {{ t("nav.login") }}
               </a>
               <a href="/register" class="text-slate-300 hover:text-white underline-offset-2 hover:underline">
-                Registrieren
+                {{ t("nav.register") }}
               </a>
             {% endif %}
+            <div class="flex items-center gap-1 border border-slate-800 rounded-lg px-2 py-1">
+              {% for code, label in languages.items() %}
+                <a
+                  href="/lang/{{ code }}"
+                  class="px-1 text-xs {% if request.state.locale == code %}text-white font-semibold{% else %}text-slate-400 hover:text-white{% endif %}"
+                >
+                  {{ label }}
+                </a>
+                {% if not loop.last %}<span class="text-slate-700">|</span>{% endif %}
+              {% endfor %}
+            </div>
             <button
               id="theme-toggle"
               class="rounded-lg border border-slate-700 bg-slate-900/60 px-2.5 py-1 text-slate-300 hover:border-slate-500 hover:text-white"
@@ -102,8 +113,8 @@
 
       <footer class="border-t border-slate-800 bg-slate-900/60">
         <div class="max-w-5xl mx-auto px-4 py-3 text-xs text-slate-500 flex justify-between items-center">
-          <span>Selfhosted VPS overview</span>
-          <span>PWA ready · Dark Mode</span>
+          <span>{{ t("footer.left") }}</span>
+          <span>{{ t("footer.right") }}</span>
         </div>
       </footer>
     </div>
