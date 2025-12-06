@@ -8,6 +8,10 @@
     <link rel="manifest" href="/manifest.webmanifest" />
 
     <!-- Tailwind via CDN for quick styling (sufficient for an MVP) -->
+    <script>
+      // Force class-based dark mode so the toggle works reliably.
+      tailwind = { config: { darkMode: "class" } };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <link rel="stylesheet" href="/static/style.css" />
