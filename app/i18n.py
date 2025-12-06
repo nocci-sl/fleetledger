@@ -325,9 +325,13 @@ translations: Dict[str, Dict[str, str]] = {
 
 def resolve_locale(request) -> str:
     """Detect locale from session override or Accept-Language; default to de."""
-    session_lang = request.session.get("lang")
-    if session_lang in AVAILABLE_LANGUAGES:
-        return session_lang
+    try:
+        if "session" in request.scope:
+            session_lang = request.session.get("lang")
+            if session_lang in AVAILABLE_LANGUAGES:
+                return session_lang
+    except Exception:
+        pass
 
     accept = request.headers.get("accept-language", "")
     for part in accept.split(","):
