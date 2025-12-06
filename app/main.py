@@ -44,6 +44,15 @@ if not SESSION_SECRET or SESSION_SECRET.startswith("CHANGE_ME"):
 
 SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "1") != "0"
 
+
+@app.middleware("http")
+async def add_locale_to_request(request: Request, call_next):
+    request.state.locale = resolve_locale(request)
+    response = await call_next(request)
+    return response
+
+
+# Session middleware (server-side session based on signed cookie)
 app.add_middleware(
     SessionMiddleware,
     secret_key=SESSION_SECRET,
@@ -52,13 +61,6 @@ app.add_middleware(
     session_cookie="fleetledger_session",
     max_age=60 * 60 * 24 * 30,  # 30 days
 )
-
-
-@app.middleware("http")
-async def add_locale_to_request(request: Request, call_next):
-    request.state.locale = resolve_locale(request)
-    response = await call_next(request)
-    return response
 
 
 @pass_context
