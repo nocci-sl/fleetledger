@@ -1,3 +1,5 @@
+import base64
+import hashlib
 import os
 import secrets
 from typing import Optional
@@ -10,11 +12,17 @@ _ENC_KEY = os.getenv("ENCRYPTION_KEY")
 _f = None
 
 if _ENC_KEY:
-    # If the key is already a valid Fernet key string, use it directly.
-    # Otherwise you could do more validation/derivation, but for now we assume a proper key.
-    _f = Fernet(
-        _ENC_KEY.encode() if not _ENC_KEY.strip().endswith("=") else _ENC_KEY
-    )
+    try:
+        key_str = _ENC_KEY.strip()
+        # Accept either a full Fernet key or derive one from an arbitrary passphrase.
+        if len(key_str) >= 44 and key_str.endswith("="):
+            fernet_key = key_str.encode()
+        else:
+            digest = hashlib.sha256(key_str.encode("utf-8")).digest()
+            fernet_key = base64.urlsafe_b64encode(digest)
+        _f = Fernet(fernet_key)
+    except Exception:
+        _f = None
 
 
 def can_encrypt() -> bool:
