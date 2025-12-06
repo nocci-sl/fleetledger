@@ -75,6 +75,10 @@ FleetLedger is a small self-hosted web app to keep track of your rented servers:
 
 ## Quick Start (Docker)
 
+### 0. Environment
+
+Kopiere `.env-example` nach `.env` und setze mindestens ein starkes `SESSION_SECRET`. Für lokale HTTP-Tests kannst du `SESSION_COOKIE_SECURE=0` setzen, in Produktion sollte es `1` bleiben. Optional kannst du einen `ENCRYPTION_KEY` (Fernet) hinterlegen, um Management-Passwörter zu speichern.
+
 ### 1. Clone / copy the repository
 
 ```bash
