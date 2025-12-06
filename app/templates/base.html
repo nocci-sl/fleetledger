@@ -11,6 +11,11 @@
     <script>
       // Force class-based dark mode so the toggle works reliably.
       tailwind = { config: { darkMode: "class" } };
+      // Tailwind CDN expects this global name
+      window.tailwind = tailwind;
+    </script>
+    <script>
+      tailwind.config = { darkMode: "class" };
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
 
