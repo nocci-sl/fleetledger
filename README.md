@@ -1,86 +1,63 @@
 # FleetLedger
 
-FleetLedger is a small self-hosted web app to keep track of your rented servers:
-
-- VPS, dedicated servers, storage boxes, managed services
-- Provider, location, IPs, hardware
-- Monthly / yearly pricing and contract dates
-- Simple access info (management URLs, SSH user + key hint)
-- Multi-user support with per-user data separation
-- Admin user management (activate / deactivate users)
-- Dark-mode-first UI with PWA support (installable as an app)
-- Per-user **map view** for server locations
-- Admin **global dashboard** for fleet-wide stats
-
-> **Security note:** FleetLedger is *not* a full password manager.
-> It is intentionally designed to store only **management password(s) optionally** and
-> only **SSH key *names*** (no private keys).
-
----
+Self-hosted Übersicht für gemietete Server (VPS, Dedizierte, Storage, Managed). Mehrnutzerfähig, Dark-Mode-first und PWA-ready.
 
 ## Features
+- Server-CRUD pro Benutzer, Soft-Delete/Archiv
+- Dashboard (Kosten, ablaufende Verträge) + Admin-Gesamtübersicht
+- Map-Ansicht pro Nutzer auf Basis der Location-Namen (Leaflet)
+- Optional verschlüsselte Speicherung von Management-Passwörtern (Fernet)
+- Session-Auth mit CSRF-Schutz, Admin-Rolle
+- PWA: Manifest, Service Worker, installierbar
 
-- **Authentication & Users**
-  - User registration + login (session cookie based)
-  - First registered user becomes **admin**
-  - Admin can view all users and activate/deactivate them
-  - Deactivated users cannot log in and will be logged out automatically
+## Stack
+- FastAPI, SQLModel, Jinja2
+- SQLite (Standard), Passlib (bcrypt), Cryptography (Fernet)
+- Tailwind via CDN, Leaflet für Karte
+- Uvicorn als ASGI-Server
 
-- **Server Management**
-  - Each user has their own list of servers (no cross-visibility)
-  - Create / edit / archive (soft-delete) servers
-  - Fields include:
-    - General: name, hostname, type (VPS, dedicated, storage, managed, other), provider, location, tags
-    - Network: IPv4, IPv6
-    - Billing: price, currency, billing period (monthly/yearly/other), contract start/end
-    - Hardware: CPU model, core count, RAM, storage size & type
-    - Access: management URL, management user, management password (optional), SSH user, SSH key hint
-    - Free-form notes
-  - Contract badges:
-    - **"abgelaufen"** (expired): contract end in the past
-    - **"läuft bald aus"** (expiring soon): contract end within the next 30 days
-    - Detail view also shows how many days until / since contract end
+## Schnellstart mit Docker
+1. Repository klonen
+   ```bash
+   git clone https://example.com/your/fleetledger.git
+   cd fleetledger
+   ```
+2. Umgebung setzen
+   ```bash
+   cp .env-example .env
+   # SESSION_SECRET in .env auf einen starken, einzigartigen Wert setzen
+   ```
+3. Starten
+   ```bash
+   docker-compose up --build
+   ```
+   Die SQLite-DB liegt in `./data/` (Bind-Mount in den Container unter `/app/data/fleetledger.db`).
 
-- **Per-user Dashboard & Map**
-  - On `/`: small dashboard row showing:
-    - number of active servers
-    - estimated total monthly cost
-    - how many contracts are expiring soon / already expired
-  - On `/map`: Leaflet-based map showing all non-archived servers of the logged-in user
-    - Marker position is derived from the `location` string (city/datacenter name)
-    - Multiple servers per city are slightly offset so all markers remain clickable
-    - Click on a marker → opens the server details page
+## Lokale Entwicklung (ohne Docker)
+- Voraussetzungen: Python 3.12, virtualenv empfohlen.
+- Setup:
+  ```bash
+  python -m venv .venv
+  source .venv/bin/activate
+  pip install -r requirements.txt
+  cp .env-example .env
+  export SESSION_SECRET="ein_langer_random_wert"
+  export SESSION_COOKIE_SECURE=0  # nur lokal ohne HTTPS
+  uvicorn app.main:app --reload --port 8000
+  ```
 
-- **Admin Global Dashboard**
-  - On `/admin/dashboard` (admin only):
-    - Global counts: users, servers, monthly cost, expiring soon, expired
-    - Breakdown by provider (server count, monthly total, expiring soon, expired)
-    - List of contracts expiring soon and already expired
+## Umgebungsvariablen
+- `SESSION_SECRET` (erforderlich): Langer, zufälliger String für die Session-Signierung.
+- `SESSION_COOKIE_SECURE` (default `1`): Auf `0` nur für lokale HTTP-Tests setzen, sonst `1` (HTTPS).
+- `DATABASE_PATH` (default `/app/data/fleetledger.db` im Docker-Image): Pfad zur SQLite-Datei. Lokal z. B. `./data/fleetledger.db`.
+- `ENCRYPTION_KEY` (optional): Fernet-Key für verschlüsselte Management-Passwörter. Leer lassen, wenn keine Speicherung gewünscht ist.
 
-- **Security**
-  - Passwords hashed with **bcrypt** (`passlib[bcrypt]`)
-  - Optional encryption for management passwords using **Fernet** (`cryptography`)
-  - No private SSH keys are stored, only name/hint strings
-  - Jinja2 auto-escaping enabled; no untrusted HTML is rendered with `|safe`
-  - Management URLs are restricted to `http://` or `https://` (no `javascript:` links, etc.)
+## Sicherheitshinweise
+- Immer einen starken `SESSION_SECRET` verwenden; im Docker-Setup wird der Start verweigert, wenn ein Platzhalter genutzt wird.
+- Produktiv hinter HTTPS betreiben (`SESSION_COOKIE_SECURE=1`).
+- Management-Passwörter nur mit gesetztem `ENCRYPTION_KEY` speichern; ohne Key werden sie nicht persistiert.
+- CSRF-Schutz ist aktiv für Form-POSTs; Browser-Service-Worker cached Assets versioniert.
 
-- **UI / UX**
-  - TailwindCSS via CDN for quick styling
-  - Dark mode is **enabled by default**
-  - Theme preference stored in `localStorage` and toggleable via a small button
-  - Responsive layout, works well on mobile
-  - PWA manifest and service worker for a simple offline-friendly experience
-
----
-
-## Quick Start (Docker)
-
-### 0. Environment
-
-Kopiere `.env-example` nach `.env` und setze mindestens ein starkes `SESSION_SECRET`. Für lokale HTTP-Tests kannst du `SESSION_COOKIE_SECURE=0` setzen, in Produktion sollte es `1` bleiben. Optional kannst du einen `ENCRYPTION_KEY` (Fernet) hinterlegen, um Management-Passwörter zu speichern.
-
-### 1. Clone / copy the repository
-
-```bash
-git clone https://example.com/your/fleetledger.git
-cd fleetledger
+## Datenhaltung
+- SQLite speichert die Daten in einer Datei (`DATABASE_PATH`). In Docker wird `./data/` aus dem Host eingebunden.
+- Backups: Einfach die SQLite-Datei in `./data/` sichern, während der Dienst gestoppt ist.

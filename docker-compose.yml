@@ -6,7 +6,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_PATH=/data/fleetledger.db
+      - DATABASE_PATH=/app/data/fleetledger.db
       # SESSION_SECRET must be provided (e.g. via .env) and should be long and random
       - SESSION_SECRET=${SESSION_SECRET:?Set SESSION_SECRET in your environment}
       # Set to 0 only for local HTTP testing; keep secure (default) in production
@@ -14,8 +14,5 @@ services:
       # Optional: encryption key for management passwords (Fernet key)
       # - ENCRYPTION_KEY=your_fernet_key_here
     volumes:
-      - fleetledger_data:/data
+      - ./data:/app/data
     restart: unless-stopped
-
-volumes:
-  fleetledger_data:

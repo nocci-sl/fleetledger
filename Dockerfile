@@ -14,7 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app ./app
 
-ENV DATABASE_PATH=/data/fleetledger.db
+RUN mkdir -p /app/data
+ENV DATABASE_PATH=/app/data/fleetledger.db
 
 EXPOSE 8000
 
