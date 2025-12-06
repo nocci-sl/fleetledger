@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex flex-col gap-4">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h1 class="text-lg font-semibold tracking-tight">{{ t("archive.title") }}</h1>
+      <p class="text-xs text-slate-400">
+        {{ t("archive.subtitle") }}
+      </p>
+    </div>
+  </div>
+
+  {% if servers %}
+  <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/60">
+    <table class="min-w-full text-sm">
+      <thead class="bg-slate-900/80">
+        <tr class="text-xs uppercase tracking-wide text-slate-400">
+          <th class="px-3 py-2 text-left">{{ t("table.name") }}</th>
+          <th class="px-3 py-2 text-left">{{ t("table.provider") }}</th>
+          <th class="px-3 py-2 text-left">{{ t("table.type") }}</th>
+          <th class="px-3 py-2 text-left">{{ t("table.location") }}</th>
+          <th class="px-3 py-2 text-left">{{ t("table.ipv4") }}</th>
+          <th class="px-3 py-2 text-right">{{ t("table.action") }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in servers %}
+        <tr class="border-t border-slate-800/80 hover:bg-slate-800/50">
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div>
+                <span class="text-slate-100 font-medium">{{ s.name }}</span>
+                {% if s.hostname %}
+                <div class="text-[11px] text-slate-400">{{ s.hostname }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-slate-200">{{ s.provider }}</td>
+          <td class="px-3 py-2">
+            <span class="inline-flex rounded-full bg-slate-800 px-2 py-0.5 text-[11px] text-slate-300">
+              {{ s.type }}
+            </span>
+          </td>
+          <td class="px-3 py-2 text-slate-200">
+            {% if s.location %}{{ s.location }}{% else %}<span class="text-slate-500">–</span>{% endif %}
+          </td>
+          <td class="px-3 py-2 text-slate-200">
+            {% if s.ipv4 %}{{ s.ipv4 }}{% else %}<span class="text-slate-500">–</span>{% endif %}
+          </td>
+          <td class="px-3 py-2 text-right text-slate-200">
+            <form method="post" action="/servers/{{ s.id }}/unarchive">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+              <button
+                type="submit"
+                class="text-emerald-200 hover:text-emerald-100 underline text-xs"
+              >
+                {{ t("archive.restore") }}
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="rounded-xl border border-dashed border-slate-700 bg-slate-900/40 p-6 text-sm text-slate-300">
+    {{ t("archive.empty") }}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

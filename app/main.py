@@ -624,6 +624,33 @@ def create_server(
     return RedirectResponse(url="/", status_code=303)
 
 
+@app.get("/servers/archived", response_class=HTMLResponse)
+def archived_servers(
+    request: Request,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(require_current_user),
+):
+    """List archived servers for the current user."""
+    servers = session.exec(
+        select(Server)
+        .where(Server.archived == True)
+        .where(Server.owner_id == current_user.id)
+        .order_by(Server.provider, Server.name)
+    ).all()
+
+    csrf_token = ensure_csrf_token(request)
+
+    return templates.TemplateResponse(
+        "servers_archived.html",
+        {
+            "request": request,
+            "servers": servers,
+            "current_user": current_user,
+            "csrf_token": csrf_token,
+        },
+    )
+
+
 @app.get("/servers/{server_id}", response_class=HTMLResponse)
 def server_detail(
     server_id: int,
@@ -799,6 +826,31 @@ def archive_server(
     session.add(server)
     session.commit()
     return RedirectResponse("/", status_code=303)
+
+
+@app.post("/servers/{server_id}/unarchive")
+def unarchive_server(
+    server_id: int,
+    request: Request,
+    csrf_token: str = Form(...),
+    session: Session = Depends(get_session),
+    current_user: User = Depends(require_current_user),
+):
+    """Restore an archived server."""
+    if not validate_csrf(request, csrf_token):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid CSRF token."
+        )
+
+    server = session.get(Server, server_id)
+    if not server or server.owner_id != current_user.id:
+        return RedirectResponse("/", status_code=303)
+
+    server.archived = False
+    server.updated_at = datetime.utcnow()
+    session.add(server)
+    session.commit()
+    return RedirectResponse("/servers/archived", status_code=303)
 
 
 # ------------- Per-user map view -------------
