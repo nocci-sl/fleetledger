@@ -58,12 +58,12 @@
             name="type"
             class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
           >
-            {% set t = server.type if server else 'vps' %}
-            <option value="vps" {% if t == 'vps' %}selected{% endif %}>VPS</option>
-            <option value="dedicated" {% if t == 'dedicated' %}selected{% endif %}>Dedicated</option>
-            <option value="storage" {% if t == 'storage' %}selected{% endif %}>Storage</option>
-            <option value="managed" {% if t == 'managed' %}selected{% endif %}>Managed</option>
-            <option value="other" {% if t == 'other' %}selected{% endif %}>Sonstiges</option>
+            {% set type_value = server.type if server else 'vps' %}
+            <option value="vps" {% if type_value == 'vps' %}selected{% endif %}>VPS</option>
+            <option value="dedicated" {% if type_value == 'dedicated' %}selected{% endif %}>Dedicated</option>
+            <option value="storage" {% if type_value == 'storage' %}selected{% endif %}>Storage</option>
+            <option value="managed" {% if type_value == 'managed' %}selected{% endif %}>Managed</option>
+            <option value="other" {% if type_value == 'other' %}selected{% endif %}>Sonstiges</option>
           </select>
         </div>
         <div class="space-y-1">
