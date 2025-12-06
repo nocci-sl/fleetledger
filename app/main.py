@@ -43,6 +43,7 @@ if not SESSION_SECRET or SESSION_SECRET.startswith("CHANGE_ME"):
     )
 
 SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "1") != "0"
+ALLOW_SELF_REGISTRATION = os.getenv("ALLOW_SELF_REGISTRATION", "0") == "1"
 
 
 @app.middleware("http")
@@ -123,7 +124,11 @@ def register_form(
     If at least one user already exists, only admins may register new users.
     """
     user_count = len(session.exec(select(User)).all())
-    if user_count > 0 and (not current_user or not current_user.is_admin):
+    if (
+        user_count > 0
+        and not ALLOW_SELF_REGISTRATION
+        and (not current_user or not current_user.is_admin)
+    ):
         return RedirectResponse("/", status_code=303)
 
     csrf_token = ensure_csrf_token(request)
@@ -170,7 +175,11 @@ def register(
         )
 
     user_count = len(session.exec(select(User)).all())
-    if user_count > 0 and (not current_user or not current_user.is_admin):
+    if (
+        user_count > 0
+        and not ALLOW_SELF_REGISTRATION
+        and (not current_user or not current_user.is_admin)
+    ):
         return RedirectResponse("/", status_code=303)
 
     error = None

@@ -51,6 +51,7 @@ Self-hosted Übersicht für gemietete Server (VPS, Dedizierte, Storage, Managed)
 - `SESSION_COOKIE_SECURE` (default `1`): Auf `0` nur für lokale HTTP-Tests setzen, sonst `1` (HTTPS).
 - `DATABASE_PATH` (default `/app/data/fleetledger.db` im Docker-Image): Pfad zur SQLite-Datei. Lokal z. B. `./data/fleetledger.db`.
 - `ENCRYPTION_KEY` (optional): Fernet-Key für verschlüsselte Management-Passwörter. Leer lassen, wenn keine Speicherung gewünscht ist.
+- `ALLOW_SELF_REGISTRATION` (default `0`): `1` erlaubt neue Selbst-Registrierungen auch wenn schon ein Admin existiert; `0` = nur Admin darf weitere User anlegen.
 
 ## Sicherheitshinweise
 - Immer einen starken `SESSION_SECRET` verwenden; im Docker-Setup wird der Start verweigert, wenn ein Platzhalter genutzt wird.
