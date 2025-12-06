@@ -7,8 +7,8 @@ from sqlmodel import Session, select
 from .db import get_session
 from .models import User
 
-BCRYPT_MAX_BYTES = 72
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# bcrypt_sha256 erlaubt auch längere Passwörter (hashing von SHA-256 vor bcrypt)
+pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
 
 
 def hash_password(password: str) -> str:
@@ -19,14 +19,6 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against a stored bcrypt hash."""
     return pwd_context.verify(plain_password, hashed_password)
-
-
-def password_too_long(password: str) -> bool:
-    """Return True if password exceeds bcrypt's 72-byte limit."""
-    try:
-        return len(password.encode("utf-8")) > BCRYPT_MAX_BYTES
-    except Exception:
-        return True
 
 
 def get_current_user(

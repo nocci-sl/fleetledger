@@ -21,7 +21,6 @@ from .utils import (
 from .auth import (
     hash_password,
     verify_password,
-    password_too_long,
     get_current_user,
     require_current_user,
     require_admin,
@@ -143,8 +142,6 @@ def register(
     error = None
     if password != password_confirm:
         error = "Passwords do not match."
-    elif password_too_long(password):
-        error = "Passwort ist zu lang (max. 72 Bytes). Bitte kürzer wählen."
     else:
         existing = session.exec(
             select(User).where(User.username == username)
@@ -218,19 +215,6 @@ def login(
             {
                 "request": request,
                 "error": "Ungültiger Sicherheits-Token. Bitte erneut versuchen.",
-                "current_user": None,
-                "csrf_token": token,
-            },
-            status_code=400,
-        )
-
-    if password_too_long(password):
-        token = ensure_csrf_token(request)
-        return templates.TemplateResponse(
-            "login.html",
-            {
-                "request": request,
-                "error": "Passwort ist zu lang (max. 72 Bytes).",
                 "current_user": None,
                 "csrf_token": token,
             },
