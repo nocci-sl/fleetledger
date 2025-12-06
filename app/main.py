@@ -45,7 +45,7 @@ app.add_middleware(
     secret_key=SESSION_SECRET,
     same_site="lax",
     https_only=SESSION_COOKIE_SECURE,
-    cookie_name="fleetledger_session",
+    session_cookie="fleetledger_session",
     max_age=60 * 60 * 24 * 30,  # 30 days
 )
 
