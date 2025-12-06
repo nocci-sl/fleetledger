@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<style>
+  /* Make Leaflet popups look a bit nicer with Tailwind-ish typography */
+  .leaflet-popup-content-wrapper {
+    background-color: #020617;
+    color: #e5e7eb;
+    border-radius: 0.75rem;
+    border: 1px solid #1f2937;
+  }
+  .leaflet-popup-tip {
+    background-color: #020617;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-4">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h1 class="text-lg font-semibold tracking-tight">Server-Karte</h1>
+      <p class="text-xs text-slate-400">
+        Zeigt alle nicht archivierten Server mit gesetzter Location auf einer Karte.
+        Für grobe Übersicht reicht die Stadt – keine exakten GPS-Daten notwendig.
+      </p>
+    </div>
+  </div>
+
+  <!-- Hidden list of servers passed via data attributes to JS -->
+  <ul id="server-data" class="hidden">
+    {% for s in servers %}
+    <li
+      data-id="{{ s.id }}"
+      data-name="{{ s.name }}"
+      data-provider="{{ s.provider }}"
+      data-ipv4="{{ s.ipv4 or '' }}"
+      data-location="{{ s.location or '' }}"
+    ></li>
+    {% endfor %}
+  </ul>
+
+  <div
+    id="map"
+    class="w-full h-[520px] rounded-xl border border-slate-800 bg-slate-900/70"
+  ></div>
+
+  <p class="text-[11px] text-slate-500">
+    Hinweis: Marker werden anhand der Location-Namen grob auf der Weltkarte platziert. Mehrere Server
+    in derselben Stadt werden leicht versetzt dargestellt, damit sie klickbar bleiben.
+  </p>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // Basic HTML escaping to avoid XSS when injecting text into popups
+  function escapeHtml(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  // Very small built-in city coordinate map (approximate, not exhaustive).
+  // Keys are lowercase.
+  const CITY_COORDS = {
+    "berlin": [52.52, 13.405],
+    "frankfurt": [50.1109, 8.6821],
+    "nuremberg": [49.4521, 11.0767],
+    "nürnberg": [49.4521, 11.0767],
+    "falkenstein": [50.474, 12.371],
+    "helsinki": [60.1699, 24.9384],
+    "amsterdam": [52.3676, 4.9041],
+    "paris": [48.8566, 2.3522],
+    "london": [51.5074, -0.1278],
+    "vienna": [48.2082, 16.3738],
+    "wien": [48.2082, 16.3738],
+    "zurich": [47.3769, 8.5417],
+    "zürich": [47.3769, 8.5417],
+    "stockholm": [59.3293, 18.0686],
+    "prague": [50.0755, 14.4378],
+    "praha": [50.0755, 14.4378],
+    "warsaw": [52.2297, 21.0122],
+    "madrid": [40.4168, -3.7038],
+    "rome": [41.9028, 12.4964],
+    "milano": [45.4642, 9.19],
+    "new york": [40.7128, -74.006],
+    "nyc": [40.7128, -74.006],
+    "chicago": [41.8781, -87.6298],
+    "ireland": [53.3498, -6.2603],   // Dublin
+    "irland": [53.3498, -6.2603],
+    "dublin": [53.3498, -6.2603],
+    "romania": [44.4268, 26.1025],   // Bucharest
+    "rumänien": [44.4268, 26.1025],
+    "bucharest": [44.4268, 26.1025],
+    "bucuresti": [44.4268, 26.1025],
+    "bucurești": [44.4268, 26.1025],
+    "moldova": [47.0105, 28.8638],   // Chișinău
+    "moldau": [47.0105, 28.8638],
+    "chisinau": [47.0105, 28.8638],
+    "chișinău": [47.0105, 28.8638],
+    "ashburn": [39.0438, -77.4874]
+  };
+
+  // Deterministic string hash → used for pseudo coordinates for unknown locations
+  function hashString(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+      h = (h << 5) - h + str.charCodeAt(i);
+      h |= 0; // force 32-bit
+    }
+    return h;
+  }
+
+  function getBaseCoords(locationKey) {
+    const key = locationKey.toLowerCase();
+    if (Object.prototype.hasOwnProperty.call(CITY_COORDS, key)) {
+      return CITY_COORDS[key];
+    }
+    // Fuzzy match: if the city keyword appears in the location string
+    for (const cityKey in CITY_COORDS) {
+      if (key.includes(cityKey)) {
+        return CITY_COORDS[cityKey];
+      }
+    }
+    return null;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const list = document.querySelectorAll("#server-data li");
+    const servers = Array.from(list).map((el) => ({
+      id: parseInt(el.dataset.id, 10),
+      name: el.dataset.name || "",
+      provider: el.dataset.provider || "",
+      ipv4: el.dataset.ipv4 || "",
+      location: el.dataset.location || ""
+    }));
+
+    const map = L.map("map", {
+      worldCopyJump: true,
+      scrollWheelZoom: true,
+      zoomSnap: 0.25
+    }).setView([20, 0], 2);
+
+    // Simple OpenStreetMap tiles
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+    }).addTo(map);
+
+    const markers = [];
+    const locationCounts = {};
+
+    // Create markers; approximate coordinates based on location string
+    for (const s of servers) {
+      const rawLoc = (s.location || "").trim();
+      if (!rawLoc) {
+        // no location → skip from map
+        continue;
+      }
+
+      const key = rawLoc.toLowerCase();
+
+      // Base coordinates: either from CITY_COORDS or a deterministic fallback
+      let base = getBaseCoords(key);
+      if (!base) {
+        const h = hashString(key);
+        // Roughly distribute unknown locations across -60..+60 lat, -180..+180 lon
+        const lat = ((h % 12000) / 100) - 60; // -60 .. +60
+        const lng = ((((h / 12000) | 0) % 36000) / 100) - 180; // -180 .. +180
+        base = [lat, lng];
+      }
+
+      const count = locationCounts[key] || 0;
+      locationCounts[key] = count + 1;
+
+      // Slight radial offset for multiple servers in the same city
+      const offset = 0.15; // degrees (~15–20km)
+      const angle = (count * 2 * Math.PI) / 6; // hex-like distribution
+      const lat = base[0] + offset * Math.sin(angle);
+      const lng = base[1] + offset * Math.cos(angle);
+
+      const popupContent = `
+        <div class="text-sm font-medium">${escapeHtml(s.name)}</div>
+        <div class="text-xs text-slate-400">${escapeHtml(s.provider)}</div>
+        ${
+          s.ipv4
+            ? `<div class="text-xs mt-1 font-mono text-slate-300">${escapeHtml(s.ipv4)}</div>`
+            : ""
+        }
+        ${
+          rawLoc
+            ? `<div class="text-[11px] text-slate-500 mt-1">${escapeHtml(rawLoc)}</div>`
+            : ""
+        }
+        <a href="/servers/${s.id}" class="text-indigo-400 underline text-xs mt-2 block">Details</a>
+      `;
+
+      const marker = L.circleMarker([lat, lng], {
+        radius: 6,
+        fillColor: "#6366f1",
+        color: "#1e3a8a",
+        weight: 1,
+        opacity: 0.8,
+        fillOpacity: 0.9
+      }).bindPopup(popupContent);
+
+      marker.addTo(map);
+      markers.push(marker);
+    }
+
+    // Auto-fit map to markers if we have any
+    if (markers.length > 0) {
+      const group = L.featureGroup(markers);
+      map.fitBounds(group.getBounds().pad(0.25));
+    } else {
+      // No markers → keep default world view
+      map.setView([20, 0], 2);
+    }
+  });
+</script>
+{% endblock %}

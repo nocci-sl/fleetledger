@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="de" class="dark" id="html-root">
+  <head>
+    <meta charset="utf-8" />
+    <title>FleetLedger</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#020617" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- Tailwind via CDN for quick styling (sufficient for an MVP) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="/static/style.css" />
+
+    <script>
+      // Apply persisted theme preference; default is dark.
+      (function () {
+        const stored = localStorage.getItem("fleetledger-theme");
+        const html = document.getElementById("html-root");
+        if (stored === "light") {
+          html.classList.remove("dark");
+        } else {
+          html.classList.add("dark");
+        }
+      })();
+    </script>
+
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body class="bg-slate-950 text-slate-100 min-h-screen">
+    <div class="min-h-screen flex flex-col">
+      <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <div class="h-8 w-8 rounded-xl bg-indigo-500/80 flex items-center justify-center text-xs font-bold">
+              FL
+            </div>
+            <div>
+              <div class="text-sm font-semibold tracking-tight">FleetLedger</div>
+              <div class="text-xs text-slate-400">Deine gemieteten Server im Blick</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 text-xs">
+            {% if current_user %}
+              <span class="text-slate-300">
+                Eingeloggt als <span class="font-semibold">{{ current_user.username }}</span>
+                {% if current_user.is_admin %}
+                  <span class="ml-1 px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/40 text-emerald-200 text-[10px]">Admin</span>
+                {% endif %}
+              </span>
+              {% if current_user.is_admin %}
+              <a href="/admin/dashboard" class="text-slate-300 hover:text-white underline-offset-2 hover:underline">
+                Admin-Dashboard
+              </a>
+              <a href="/users" class="text-slate-300 hover:text-white underline-offset-2 hover:underline">
+                User
+              </a>
+              {% endif %}
+              <a href="/" class="text-slate-300 hover:text-white underline-offset-2 hover:underline">
+                Übersicht
+              </a>
+              <a href="/map" class="text-slate-300 hover:text-white underline-offset-2 hover:underline">
+                Karte
+              </a>
+              <a
+                href="/servers/new"
+                class="inline-flex items-center gap-1 rounded-lg bg-indigo-500 px-3 py-1.5 font-medium hover:bg-indigo-400 focus:outline-none focus:ring focus:ring-indigo-500/40"
+              >
+                <span class="text-lg leading-none">＋</span>
+                <span>Server anlegen</span>
+              </a>
+              <a
+                href="/logout"
+                class="rounded-lg border border-slate-700 px-2.5 py-1 text-slate-300 hover:border-slate-500 hover:text-white"
+              >
+                Logout
+              </a>
+            {% else %}
+              <a href="/login" class="text-slate-300 hover:text-white underline-offset-2 hover:underline">
+                Login
+              </a>
+              <a href="/register" class="text-slate-300 hover:text-white underline-offset-2 hover:underline">
+                Registrieren
+              </a>
+            {% endif %}
+            <button
+              id="theme-toggle"
+              class="rounded-lg border border-slate-700 bg-slate-900/60 px-2.5 py-1 text-slate-300 hover:border-slate-500 hover:text-white"
+              type="button"
+            >
+              🌓
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="flex-1">
+        <div class="max-w-5xl mx-auto px-4 py-6">
+          {% block content %}{% endblock %}
+        </div>
+      </main>
+
+      <footer class="border-t border-slate-800 bg-slate-900/60">
+        <div class="max-w-5xl mx-auto px-4 py-3 text-xs text-slate-500 flex justify-between items-center">
+          <span>Selfhosted VPS overview</span>
+          <span>PWA ready · Dark Mode</span>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      // Theme toggle button handler
+      document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.getElementById("html-root");
+        const isDark = html.classList.toggle("dark");
+        localStorage.setItem("fleetledger-theme", isDark ? "dark" : "light");
+      });
+
+      // Register service worker for PWA
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("/service-worker.js")
+          .catch((err) => console.error("SW registration failed", err));
+      }
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+  </body>
+</html>

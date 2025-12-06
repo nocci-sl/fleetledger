@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-3xl mx-auto">
+  <h1 class="text-lg font-semibold tracking-tight mb-1">
+    {% if server %}Server bearbeiten{% else %}Neuen Server anlegen{% endif %}
+  </h1>
+  <p class="text-xs text-slate-400 mb-4">
+    Trage alle relevanten Infos zu deinem VPS / Server ein.
+  </p>
+
+  {% if not can_encrypt %}
+  <div class="mb-4 text-xs text-amber-200 bg-amber-500/10 border border-amber-500/60 rounded-lg p-3">
+    ENCRYPTION_KEY ist nicht gesetzt – eingegebene Management-Passwörter werden nicht gespeichert.
+  </div>
+  {% endif %}
+
+  <form method="post" class="space-y-6">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <!-- General -->
+    <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
+      <h2 class="text-sm font-semibold text-slate-100">Allgemein</h2>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">Name *</label>
+          <input
+            type="text"
+            name="name"
+            required
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            placeholder="Prod-DB-01"
+            value="{{ server.name if server else '' }}"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">Provider *</label>
+          <input
+            type="text"
+            name="provider"
+            required
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            placeholder="Hetzner / OVH / ..."
+            value="{{ server.provider if server else '' }}"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">Hostname</label>
+          <input
+            type="text"
+            name="hostname"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            placeholder="server1.example.com"
+            value="{{ server.hostname if server and server.hostname else '' }}"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">Typ</label>
+          <select
+            name="type"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+          >
+            {% set t = server.type if server else 'vps' %}
+            <option value="vps" {% if t == 'vps' %}selected{% endif %}>VPS</option>
+            <option value="dedicated" {% if t == 'dedicated' %}selected{% endif %}>Dedicated</option>
+            <option value="storage" {% if t == 'storage' %}selected{% endif %}>Storage</option>
+            <option value="managed" {% if t == 'managed' %}selected{% endif %}>Managed</option>
+            <option value="other" {% if t == 'other' %}selected{% endif %}>Sonstiges</option>
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">Location</label>
+          <input
+            type="text"
+            name="location"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            placeholder="Falkenstein / Frankfurt / Helsinki / Ashburn"
+            value="{{ server.location if server and server.location else '' }}"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">Tags (kommagetrennt)</label>
+          <input
+            type="text"
+            name="tags"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            placeholder="prod,critical,backup"
+            value="{{ server.tags if server and server.tags else '' }}"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Network -->
+    <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
+      <h2 class="text-sm font-semibold text-slate-100">Netzwerk</h2>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">IPv4</label>
+          <input
+            type="text"
+            name="ipv4"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            placeholder="192.0.2.10"
+            value="{{ server.ipv4 if server and server.ipv4 else '' }}"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">IPv6</label>
+          <input
+            type="text"
+            name="ipv6"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            placeholder="2001:db8::10"
+            value="{{ server.ipv6 if server and server.ipv6 else '' }}"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Costs -->
+    <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
+      <h2 class="text-sm font-semibold text-slate-100">Kosten</h2>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">Betrag</label>
+          <input
+            type="number"
+            step="0.01"
+            name="price"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            placeholder="5.00"
+            value="{{ server.price if server else '' }}"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">Währung</label>
+          <input
+            type="text"
+            name="currency"
+            value="{{ server.currency if server else 'EUR' }}"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">Abrechnung</label>
+          <select
+            name="billing_period"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+          >
+            {% set bp = server.billing_period if server else 'monthly' %}
+            <option value="monthly" {% if bp == 'monthly' %}selected{% endif %}>Monatlich</option>
+            <option value="yearly" {% if bp == 'yearly' %}selected{% endif %}>Jährlich</option>
+            <option value="other" {% if bp == 'other' %}selected{% endif %}>Sonstiges</option>
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">Vertragsbeginn</label>
+          <input
+            type="date"
+            name="contract_start"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            value="{{ server.contract_start if server and server.contract_start else '' }}"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">Vertragsende</label>
+          <input
+            type="date"
+            name="contract_end"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            value="{{ server.contract_end if server and server.contract_end else '' }}"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Hardware -->
+    <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
+      <h2 class="text-sm font-semibold text-slate-100">Hardware</h2>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">CPU-Modell</label>
+          <input
+            type="text"
+            name="cpu_model"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            placeholder="Ryzen 5 3600"
+            value="{{ server.cpu_model if server and server.cpu_model else '' }}"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">CPU Cores</label>
+          <input
+            type="number"
+            name="cpu_cores"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            value="{{ server.cpu_cores if server and server.cpu_cores else '' }}"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">RAM (MB)</label>
+          <input
+            type="number"
+            name="ram_mb"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            value="{{ server.ram_mb if server and server.ram_mb else '' }}"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">Storage (GB)</label>
+          <input
+            type="number"
+            name="storage_gb"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            value="{{ server.storage_gb if server and server.storage_gb else '' }}"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">Storage-Typ</label>
+          <input
+            type="text"
+            name="storage_type"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            placeholder="nvme / ssd / hdd / ceph"
+            value="{{ server.storage_type if server and server.storage_type else '' }}"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Access -->
+    <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
+      <h2 class="text-sm font-semibold text-slate-100">Zugänge</h2>
+      <p class="text-xs text-slate-400">
+        SSH: hier nur <strong>Key-Namen</strong> oder Hints eintragen, keine privaten Keys.
+      </p>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">Management URL</label>
+          <input
+            type="url"
+            name="mgmt_url"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            placeholder="https://hetzner.cloud/project/..."
+            value="{{ server.mgmt_url if server and server.mgmt_url else '' }}"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">Management User</label>
+          <input
+            type="text"
+            name="mgmt_user"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            value="{{ server.mgmt_user if server and server.mgmt_user else '' }}"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">Management Passwort</label>
+          <input
+            type="password"
+            name="mgmt_password"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            placeholder="{% if can_encrypt %}Neues Passwort setzen (leer = unverändert){% else %}Wird NICHT gespeichert{% endif %}"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">SSH User</label>
+          <input
+            type="text"
+            name="ssh_user"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            placeholder="root / debian / nocci"
+            value="{{ server.ssh_user if server and server.ssh_user else '' }}"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-300">SSH Key Hint</label>
+          <input
+            type="text"
+            name="ssh_key_hint"
+            class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            placeholder="id_ed25519_hetzner"
+            value="{{ server.ssh_key_hint if server and server.ssh_key_hint else '' }}"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Notes -->
+    <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
+      <h2 class="text-sm font-semibold text-slate-100">Notizen</h2>
+      <textarea
+        name="notes"
+        rows="4"
+        class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+        placeholder="Besondere Einstellungen, Projekte, die hier laufen, etc."
+      >{{ server.notes if server and server.notes else '' }}</textarea>
+    </section>
+
+    <div class="flex justify-between items-center">
+      <a
+        href="/"
+        class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-200 hover:border-slate-500 hover:text-white"
+        >Abbrechen</a
+      >
+      <button
+        type="submit"
+        class="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 focus:outline-none focus:ring focus:ring-indigo-500/40"
+      >
+        {% if server %}Änderungen speichern{% else %}Speichern{% endif %}
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+s

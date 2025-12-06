@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="space-y-4">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <div class="text-xs text-slate-400 mb-1">Server</div>
+      <h1 class="text-lg font-semibold tracking-tight flex items-center gap-2">
+        {{ server.name }}
+        {% if server.is_expired %}
+        <span class="inline-flex items-center rounded-full bg-rose-600/15 border border-rose-600/60 px-2 py-0.5 text-[10px] text-rose-200">
+          abgelaufen
+        </span>
+        {% elif server.is_expiring_soon %}
+        <span class="inline-flex items-center rounded-full bg-amber-500/15 border border-amber-500/60 px-2 py-0.5 text-[10px] text-amber-200">
+          läuft bald aus
+        </span>
+        {% endif %}
+      </h1>
+      {% if server.hostname %}
+      <p class="text-xs text-slate-400">{{ server.hostname }}</p>
+      {% endif %}
+      {% if server.contract_end %}
+      <p class="text-[11px] text-slate-500 mt-1">
+        Vertragsende: {{ server.contract_end }}
+        {% if server.days_until_contract_end is not none %}
+          {% if server.days_until_contract_end < 0 %}
+            (vor {{ (server.days_until_contract_end * -1) }} Tagen)
+          {% elif server.days_until_contract_end == 0 %}
+            (heute)
+          {% else %}
+            (in {{ server.days_until_contract_end }} Tagen)
+          {% endif %}
+        {% endif %}
+      </p>
+      {% endif %}
+    </div>
+    <div class="flex flex-wrap gap-2 text-xs items-center">
+      <span class="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 text-slate-300">
+        {{ server.provider }}
+      </span>
+      <span class="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 text-slate-300">
+        {{ server.type }}
+      </span>
+      {% if server.location %}
+      <span class="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 text-slate-300">
+        {{ server.location }}
+      </span>
+      {% endif %}
+      {% if server.tags %}
+      <span class="inline-flex items-center rounded-full bg-indigo-500/20 border border-indigo-500/60 px-2 py-0.5 text-indigo-100">
+        {{ server.tags }}
+      </span>
+      {% endif %}
+      <a
+        href="/servers/{{ server.id }}/edit"
+        class="ml-2 rounded-lg border border-slate-700 px-3 py-1 text-xs text-slate-100 hover:border-slate-500 hover:text-white"
+      >
+        Bearbeiten
+      </a>
+      <form method="post" action="/servers/{{ server.id }}/archive" onsubmit="return confirm('Diesen Server archivieren?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <button
+          type="submit"
+          class="rounded-lg border border-rose-600 px-3 py-1 text-xs text-rose-200 hover:bg-rose-600/10"
+        >
+          Archivieren
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-4">
+    <!-- Network & Cost -->
+    <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-2">
+      <h2 class="text-sm font-semibold text-slate-100">Netz & Kosten</h2>
+      <dl class="text-xs text-slate-300 space-y-1">
+        <div class="flex justify-between gap-3">
+          <dt class="text-slate-400">IPv4</dt>
+          <dd class="text-right">{% if server.ipv4 %}{{ server.ipv4 }}{% else %}–{% endif %}</dd>
+        </div>
+        <div class="flex justify-between gap-3">
+          <dt class="text-slate-400">IPv6</dt>
+          <dd class="text-right">{% if server.ipv6 %}{{ server.ipv6 }}{% else %}–{% endif %}</dd>
+        </div>
+        <div class="flex justify-between gap-3">
+          <dt class="text-slate-400">Kosten</dt>
+          <dd class="text-right">
+            {% if server.price %}
+            {{ "%.2f"|format(server.price) }} {{ server.currency }} /
+            {{ "Monat" if server.billing_period == "monthly" else "Jahr" }}
+            {% else %}–{% endif %}
+          </dd>
+        </div>
+        <div class="flex justify-between gap-3">
+          <dt class="text-slate-400">Vertrag</dt>
+          <dd class="text-right">
+            {% if server.contract_start %}ab {{ server.contract_start }}{% endif %}
+            {% if server.contract_end %} bis {{ server.contract_end }}{% endif %}
+            {% if not server.contract_start and not server.contract_end %}–{% endif %}
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- Hardware -->
+    <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-2">
+      <h2 class="text-sm font-semibold text-slate-100">Hardware</h2>
+      <dl class="text-xs text-slate-300 space-y-1">
+        <div class="flex justify-between gap-3">
+          <dt class="text-slate-400">CPU</dt>
+          <dd class="text-right">
+            {% if server.cpu_model %}{{ server.cpu_model }}{% else %}–{% endif %}
+            {% if server.cpu_cores %} ({{ server.cpu_cores }} Cores){% endif %}
+          </dd>
+        </div>
+        <div class="flex justify-between gap-3">
+          <dt class="text-slate-400">RAM</dt>
+          <dd class="text-right">
+            {% if server.ram_mb %}{{ server.ram_mb }} MB{% else %}–{% endif %}
+          </dd>
+        </div>
+        <div class="flex justify-between gap-3">
+          <dt class="text-slate-400">Storage</dt>
+          <dd class="text-right">
+            {% if server.storage_gb %}{{ server.storage_gb }} GB{% else %}–{% endif %}
+            {% if server.storage_type %} ({{ server.storage_type }}){% endif %}
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- Access -->
+    <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-2">
+      <h2 class="text-sm font-semibold text-slate-100">Zugänge</h2>
+      <dl class="text-xs text-slate-300 space-y-1">
+        <div class="flex justify-between gap-3">
+          <dt class="text-slate-400">Management</dt>
+          <dd class="text-right">
+            {% if server.mgmt_url %}
+            <a href="{{ server.mgmt_url }}" target="_blank" rel="noopener noreferrer" class="text-indigo-300 hover:text-indigo-200 underline">
+              Console öffnen
+            </a>
+            {% else %}–{% endif %}
+          </dd>
+        </div>
+        <div class="flex justify-between gap-3">
+          <dt class="text-slate-400">Mgmt-User</dt>
+          <dd class="text-right">{% if server.mgmt_user %}{{ server.mgmt_user }}{% else %}–{% endif %}</dd>
+        </div>
+        <div class="flex justify-between gap-3">
+          <dt class="text-slate-400">Mgmt-Passwort</dt>
+          <dd class="text-right">
+            {% if server.mgmt_password_encrypted %}
+              {% if mgmt_password %}
+                <span class="font-mono text-slate-100">{{ mgmt_password }}</span>
+              {% else %}
+                <span class="text-slate-500">verschlüsselt gespeichert (Key fehlt?)</span>
+              {% endif %}
+            {% else %}
+              –
+            {% endif %}
+          </dd>
+        </div>
+        <div class="flex justify-between gap-3">
+          <dt class="text-slate-400">SSH User</dt>
+          <dd class="text-right">{% if server.ssh_user %}{{ server.ssh_user }}{% else %}–{% endif %}</dd>
+        </div>
+        <div class="flex justify-between gap-3">
+          <dt class="text-slate-400">SSH Key Hint</dt>
+          <dd class="text-right">
+            {% if server.ssh_key_hint %}
+            <span class="font-mono">{{ server.ssh_key_hint }}</span>
+            {% else %}–{% endif %}
+          </dd>
+        </div>
+      </dl>
+      <p class="mt-2 text-[11px] text-slate-500">
+        Hinweis: Es werden nur Key-Namen gespeichert, keine privaten SSH-Schlüssel.
+      </p>
+    </section>
+
+    <!-- Notes -->
+    <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-2 md:col-span-2">
+      <h2 class="text-sm font-semibold text-slate-100">Notizen</h2>
+      <div class="text-xs text-slate-200 whitespace-pre-wrap">
+        {% if server.notes %}{{ server.notes }}{% else %}<span class="text-slate-500">Keine Notizen.</span>{% endif %}
+      </div>
+    </section>
+  </div>
+
+  <div class="flex justify-between items-center text-xs text-slate-500">
+    <a href="/" class="hover:text-slate-200 underline underline-offset-2">Zurück zur Übersicht</a>
+    <span>Zuletzt aktualisiert: {{ server.updated_at }}</span>
+  </div>
+</div>
+{% endblock %}

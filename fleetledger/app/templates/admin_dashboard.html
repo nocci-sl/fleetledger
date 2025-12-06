@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex flex-col gap-4">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h1 class="text-lg font-semibold tracking-tight">Admin-Dashboard</h1>
+      <p class="text-xs text-slate-400">
+        Globale Übersicht über alle nicht archivierten Server und Benutzer.
+      </p>
+    </div>
+  </div>
+
+  {% if stats %}
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+    <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-3 flex flex-col">
+      <span class="text-[11px] text-slate-400 mb-1">Benutzer</span>
+      <span class="text-lg font-semibold text-slate-100">
+        {{ stats.total_users }}
+      </span>
+      <span class="text-[11px] text-slate-500 mt-1">Accounts</span>
+    </div>
+    <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-3 flex flex-col">
+      <span class="text-[11px] text-slate-400 mb-1">Server</span>
+      <span class="text-lg font-semibold text-slate-100">
+        {{ stats.total_servers }}
+      </span>
+      <span class="text-[11px] text-slate-500 mt-1">nicht archiviert</span>
+    </div>
+    <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-3 flex flex-col">
+      <span class="text-[11px] text-slate-400 mb-1">Laufende Kosten</span>
+      <span class="text-lg font-semibold text-slate-100">
+        {{ "%.2f"|format(stats.monthly_total) }}
+        {% if stats.monthly_currency %} {{ stats.monthly_currency }}{% endif %}
+      </span>
+      <span class="text-[11px] text-slate-500 mt-1">
+        pro Monat{% if stats.mixed_currencies %} (gemischte Währungen){% endif %}
+      </span>
+    </div>
+    <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-3 flex flex-col">
+      <span class="text-[11px] text-slate-400 mb-1">Vertragstatus</span>
+      <span class="text-[11px] text-amber-200">
+        Bald auslaufend: {{ stats.expiring_soon }}
+      </span>
+      <span class="text-[11px] text-rose-200">
+        Abgelaufen: {{ stats.expired }}
+      </span>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Provider breakdown -->
+  <section class="space-y-2 mt-4">
+    <h2 class="text-sm font-semibold tracking-tight text-slate-200">Nach Provider</h2>
+    <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/60">
+      <table class="min-w-full text-sm">
+        <thead class="bg-slate-900/80 text-xs uppercase tracking-wide text-slate-400">
+          <tr>
+            <th class="px-3 py-2 text-left">Provider</th>
+            <th class="px-3 py-2 text-right">Server</th>
+            <th class="px-3 py-2 text-right">Monatskosten</th>
+            <th class="px-3 py-2 text-right">Laufen bald aus</th>
+            <th class="px-3 py-2 text-right">Abgelaufen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if provider_stats %}
+            {% for provider, ps in provider_stats.items() %}
+            <tr class="border-t border-slate-800/80 hover:bg-slate-800/50">
+              <td class="px-3 py-2 text-slate-100">{{ provider }}</td>
+              <td class="px-3 py-2 text-right text-slate-200">{{ ps.count }}</td>
+              <td class="px-3 py-2 text-right text-slate-200">
+                {{ "%.2f"|format(ps.monthly_total) }}
+                {% if ps.currency_set|length == 1 %}
+                  {{ (ps.currency_set|list)[0] }}
+                {% elif ps.currency_set|length > 1 %}
+                  <span class="text-[11px] text-slate-400">(mixed)</span>
+                {% endif %}
+              </td>
+              <td class="px-3 py-2 text-right text-amber-200">{{ ps.expiring_soon }}</td>
+              <td class="px-3 py-2 text-right text-rose-200">{{ ps.expired }}</td>
+            </tr>
+            {% endfor %}
+          {% else %}
+          <tr>
+            <td colspan="5" class="px-3 py-3 text-xs text-slate-400">
+              Keine Server erfasst.
+            </td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Contracts: expiring soon & expired -->
+  <section class="grid md:grid-cols-2 gap-4 mt-4">
+    <div class="space-y-2">
+      <h2 class="text-sm font-semibold tracking-tight text-slate-200">Laufen bald aus (≤ 30 Tage)</h2>
+      <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-3 text-xs">
+        {% if expiring_soon_list %}
+        <ul class="space-y-2">
+          {% for s in expiring_soon_list %}
+          <li class="flex items-center justify-between gap-2">
+            <div>
+              <a href="/servers/{{ s.id }}" class="text-slate-100 hover:text-indigo-300 font-medium">
+                {{ s.name }}
+              </a>
+              <div class="text-[11px] text-slate-400">
+                {{ s.provider }}
+                {% if s.location %} · {{ s.location }}{% endif %}
+              </div>
+            </div>
+            <div class="text-right text-[11px] text-amber-200">
+              endet {{ s.contract_end }}
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div class="text-slate-500">Keine Verträge laufen in den nächsten 30 Tagen aus.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="space-y-2">
+      <h2 class="text-sm font-semibold tracking-tight text-slate-200">Abgelaufene Verträge</h2>
+      <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-3 text-xs">
+        {% if expired_list %}
+        <ul class="space-y-2">
+          {% for s in expired_list[:10] %}
+          <li class="flex items-center justify-between gap-2">
+            <div>
+              <a href="/servers/{{ s.id }}" class="text-slate-100 hover:text-indigo-300 font-medium">
+                {{ s.name }}
+              </a>
+              <div class="text-[11px] text-slate-400">
+                {{ s.provider }}
+                {% if s.location %} · {{ s.location }}{% endif %}
+              </div>
+            </div>
+            <div class="text-right text-[11px] text-rose-200">
+              endete {{ s.contract_end }}
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div class="text-slate-500">Keine abgelaufenen Verträge gefunden.</div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
