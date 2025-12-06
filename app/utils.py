@@ -2,6 +2,7 @@ import base64
 import hashlib
 import os
 import secrets
+import re
 from typing import Optional
 
 from cryptography.fernet import Fernet, InvalidToken
@@ -47,6 +48,57 @@ def decrypt_secret(token: str) -> Optional[str]:
         return plaintext.decode("utf-8")
     except (InvalidToken, ValueError):
         return None
+
+
+# ----- Parsing helpers -----
+
+def parse_decimal(value: str) -> Optional[float]:
+    """Parse a decimal number allowing comma or dot."""
+    if not value:
+        return None
+    try:
+        normalized = value.replace(",", ".").strip()
+        return float(normalized)
+    except ValueError:
+        return None
+
+
+def parse_ram_mb(value: str) -> Optional[int]:
+    """
+    Parse RAM with optional unit (MB/GB/TB). Defaults to GB if a unit is missing.
+    Returns MB.
+    """
+    if not value:
+        return None
+    v = value.strip().lower()
+    match = re.match(r"([0-9]+(?:[\\.,][0-9]+)?)(tb|gb|mb)?", v)
+    if not match:
+        return None
+    number = float(match.group(1).replace(",", "."))
+    unit = match.group(2) or "gb"
+    if unit == "tb":
+        return int(number * 1024 * 1024)
+    if unit == "gb":
+        return int(number * 1024)
+    return int(number)
+
+
+def parse_storage_gb(value: str) -> Optional[int]:
+    """
+    Parse storage with optional unit (GB/TB). Defaults to GB.
+    Returns GB.
+    """
+    if not value:
+        return None
+    v = value.strip().lower()
+    match = re.match(r"([0-9]+(?:[\\.,][0-9]+)?)(tb|gb)?", v)
+    if not match:
+        return None
+    number = float(match.group(1).replace(",", "."))
+    unit = match.group(2) or "gb"
+    if unit == "tb":
+        return int(number * 1024)
+    return int(number)
 
 
 # ----- CSRF helpers -----

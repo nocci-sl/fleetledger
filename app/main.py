@@ -17,6 +17,9 @@ from .utils import (
     can_encrypt,
     ensure_csrf_token,
     validate_csrf,
+    parse_decimal,
+    parse_ram_mb,
+    parse_storage_gb,
 )
 from jinja2 import pass_context
 
@@ -542,14 +545,14 @@ def create_server(
     ipv4: str = Form(""),
     ipv6: str = Form(""),
     billing_period: str = Form("monthly"),
-    price: float = Form(0.0),
+    price: str = Form("0"),
     currency: str = Form("EUR"),
     contract_start: Optional[str] = Form(None),
     contract_end: Optional[str] = Form(None),
     cpu_model: str = Form(""),
     cpu_cores: int = Form(0),
-    ram_mb: int = Form(0),
-    storage_gb: int = Form(0),
+    ram_mb: str = Form(""),
+    storage_gb: str = Form(""),
     storage_type: str = Form(""),
     tags: str = Form(""),
     mgmt_url: str = Form(""),
@@ -573,6 +576,10 @@ def create_server(
     )
     c_end = datetime.fromisoformat(contract_end).date() if contract_end else None
 
+    parsed_price = parse_decimal(price) or 0.0
+    parsed_ram = parse_ram_mb(ram_mb)
+    parsed_storage = parse_storage_gb(storage_gb)
+
     enc_pwd = encrypt_secret(mgmt_password) if mgmt_password else None
 
     # Only allow http:// or https:// URLs to avoid javascript: schemes etc.
@@ -593,14 +600,14 @@ def create_server(
         ipv4=ipv4 or None,
         ipv6=ipv6 or None,
         billing_period=billing_period,
-        price=price,
+        price=parsed_price,
         currency=currency,
         contract_start=c_start,
         contract_end=c_end,
         cpu_model=cpu_model or None,
         cpu_cores=cpu_cores or None,
-        ram_mb=ram_mb or None,
-        storage_gb=storage_gb or None,
+        ram_mb=parsed_ram,
+        storage_gb=parsed_storage,
         storage_type=storage_type or None,
         tags=tags or None,
         mgmt_url=mgmt_url_clean or None,
@@ -687,14 +694,14 @@ def update_server(
     ipv4: str = Form(""),
     ipv6: str = Form(""),
     billing_period: str = Form("monthly"),
-    price: float = Form(0.0),
+    price: str = Form("0"),
     currency: str = Form("EUR"),
     contract_start: Optional[str] = Form(None),
     contract_end: Optional[str] = Form(None),
     cpu_model: str = Form(""),
     cpu_cores: int = Form(0),
-    ram_mb: int = Form(0),
-    storage_gb: int = Form(0),
+    ram_mb: str = Form(""),
+    storage_gb: str = Form(""),
     storage_type: str = Form(""),
     tags: str = Form(""),
     mgmt_url: str = Form(""),
@@ -742,14 +749,15 @@ def update_server(
     server.ipv4 = ipv4 or None
     server.ipv6 = ipv6 or None
     server.billing_period = billing_period
-    server.price = price
+    parsed_price = parse_decimal(price)
+    server.price = parsed_price or 0.0
     server.currency = currency
     server.contract_start = c_start
     server.contract_end = c_end
     server.cpu_model = cpu_model or None
     server.cpu_cores = cpu_cores or None
-    server.ram_mb = ram_mb or None
-    server.storage_gb = storage_gb or None
+    server.ram_mb = parse_ram_mb(ram_mb)
+    server.storage_gb = parse_storage_gb(storage_gb)
     server.storage_type = storage_type or None
     server.tags = tags or None
     server.mgmt_url = mgmt_url_clean or None

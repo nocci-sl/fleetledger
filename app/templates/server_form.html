@@ -123,8 +123,7 @@
         <div class="space-y-1">
           <label class="text-xs text-slate-300">{{ t("label.amount") }}</label>
           <input
-            type="number"
-            step="0.01"
+            type="text"
             name="price"
             class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
             placeholder="5.00"
@@ -199,18 +198,20 @@
         <div class="space-y-1">
           <label class="text-xs text-slate-300">{{ t("label.ram_mb") }}</label>
           <input
-            type="number"
+            type="text"
             name="ram_mb"
             class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            placeholder="32GB / 32768MB"
             value="{{ server.ram_mb if server and server.ram_mb else '' }}"
           />
         </div>
         <div class="space-y-1">
           <label class="text-xs text-slate-300">{{ t("label.storage_gb") }}</label>
           <input
-            type="number"
+            type="text"
             name="storage_gb"
             class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            placeholder="4TB / 500GB"
             value="{{ server.storage_gb if server and server.storage_gb else '' }}"
           />
         </div>
