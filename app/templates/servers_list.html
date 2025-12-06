@@ -65,6 +65,7 @@
           <th class="px-3 py-2 text-left">Location</th>
           <th class="px-3 py-2 text-left">IPv4</th>
           <th class="px-3 py-2 text-right">Kosten</th>
+          <th class="px-3 py-2 text-right">Aktion</th>
         </tr>
       </thead>
       <tbody>
@@ -110,6 +111,11 @@
             {% else %}
             <span class="text-slate-500">–</span>
             {% endif %}
+          </td>
+          <td class="px-3 py-2 text-right text-slate-200">
+            <a href="/servers/{{ s.id }}/edit" class="text-indigo-300 hover:text-indigo-200 underline text-xs">
+              Bearbeiten
+            </a>
           </td>
         </tr>
         {% endfor %}
