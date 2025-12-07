@@ -22,27 +22,18 @@ Self-hosted overview for rented servers (VPS, dedicated, storage, managed). Mult
   - Pull directly with `docker pull ghcr.io/nocci-sl/fleetledger:latest`.
 
 ## Quickstart with Docker Compose (prebuilt image)
-Use the published GHCR image; no local build needed.
+Use the included `docker-compose.yml` with the published GHCR image; no local build needed.
 ```bash
 cp .env-example .env
 # set SESSION_SECRET in .env to a strong random value
-
-cat > docker-compose.override.yml <<'EOF'
-services:
-  fleetledger:
-    image: ghcr.io/nocci-sl/fleetledger:latest
-    environment:
-      SESSION_SECRET: ${SESSION_SECRET:?set in .env}
-      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-1}
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
-      ALLOW_SELF_REGISTRATION: ${ALLOW_SELF_REGISTRATION:-0}
-    volumes:
-      - ./data:/app/data
-EOF
-
 docker-compose up -d
 ```
 SQLite will live on the host in `./data/fleetledger.db`.
+To update, pull the latest image and recreate:
+```bash
+docker-compose pull
+docker-compose up -d
+```
 
 ## Quickstart with Docker (build locally)
 ```bash

@@ -1,19 +1,17 @@
 services:
   fleetledger:
-    build: .
+    image: ghcr.io/nocci-sl/fleetledger:latest
     container_name: fleetledger
-    ports:
-      - "8000:8000"
+    env_file:
+      - .env
     environment:
-      - DATABASE_PATH=/app/data/fleetledger.db
-      # SESSION_SECRET must be provided (e.g. via .env) and should be long and random
-      - SESSION_SECRET=${SESSION_SECRET:?Set SESSION_SECRET in your environment}
-      # Set to 0 only for local HTTP testing; keep secure (default) in production
-      - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE:-1}
-      # Optional: encryption key for management passwords (Fernet key)
-      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-}
-      # Allow self-registration after first admin (1 = allow, 0 = only admin-created)
-      - ALLOW_SELF_REGISTRATION=${ALLOW_SELF_REGISTRATION:-0}
+      SESSION_SECRET: ${SESSION_SECRET:?Set SESSION_SECRET in .env}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-1}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
+      ALLOW_SELF_REGISTRATION: ${ALLOW_SELF_REGISTRATION:-0}
+      DATABASE_PATH: ${DATABASE_PATH:-/app/data/fleetledger.db}
     volumes:
       - ./data:/app/data
+    ports:
+      - "8000:8000"
     restart: unless-stopped
