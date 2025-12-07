@@ -16,6 +16,19 @@ Self-hosted overview for rented servers (VPS, dedicated, storage, managed). Mult
 - Tailwind via CDN, Leaflet for maps
 - Uvicorn as ASGI server
 
+## Screenshots
+Store optimized images in `docs/img/`. Suggested captures (add the files to avoid broken links):
+- `docs/img/dashboard.webp` — dashboard overview.
+- `docs/img/server-detail.webp` — server detail/edit view.
+- `docs/img/map.webp` — per-user map view.
+
+Ready-to-display slots (fill the files above):
+![Dashboard](docs/img/dashboard.webp)
+![Server detail](docs/img/server-detail.webp)
+![Map view](docs/img/map.webp)
+
+Recommended: use WebP or PNG, keep files small (<400 KB), blur/redact sensitive data before committing.
+
 ## Containers and Images
 - Public repo: `https://github.com/nocci-sl/fleetledger`.
 - Prebuilt image on GHCR: `ghcr.io/nocci-sl/fleetledger:latest` (plus commit-tagged `ghcr.io/nocci-sl/fleetledger:<git-sha>`).
